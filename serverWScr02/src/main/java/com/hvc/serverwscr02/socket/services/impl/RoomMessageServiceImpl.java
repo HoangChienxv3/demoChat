@@ -88,7 +88,7 @@ public class RoomMessageServiceImpl implements RoomMessageService {
     }
 
     @Override
-    public void getListUserRoom(RequestMessage requestMessage, Users user) throws JsonProcessingException {
+    public void getListRoomOfUser(RequestMessage requestMessage, Users user) throws JsonProcessingException {
         RoomUser roomUser = SocketManager.roomUserMap.get(user.getId());
         String json;
         if (roomUser == null) {
@@ -108,7 +108,7 @@ public class RoomMessageServiceImpl implements RoomMessageService {
         });
         json = objectMapper.writeValueAsString(new ResponseMessage<>(
                 roomList,
-                MessageType.GET_LIST_USER_ROOM,
+                MessageType.GET_LIST_ROOM_OF_USER,
                 user
         ));
         sendServiceService.sendMessageToUser(json, user);

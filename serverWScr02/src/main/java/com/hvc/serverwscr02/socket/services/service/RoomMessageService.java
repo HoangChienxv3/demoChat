@@ -14,6 +14,8 @@ public interface RoomMessageService {
 
     void leaveRoom(RequestMessage requestMessage, Users user);
 
+    void updateRoom(RequestMessage requestMessage, Users user) throws JsonProcessingException;
+
     void deleteRoom(RequestMessage requestMessage, Users user);
 
 

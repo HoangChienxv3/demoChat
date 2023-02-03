@@ -76,7 +76,7 @@ public class WebSocketServer {
                 roomMessageService.getListUserRoom(requestMessage, user);
                 break;
             case UPDATE_ROOM:
-                System.out.println(message + MessageType.UPDATE_ROOM);
+                roomMessageService.updateRoom(requestMessage, user);
                 break;
             case LEAVE_ROOM:
                 System.out.println(message + MessageType.LEAVE_ROOM);

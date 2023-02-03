@@ -25,12 +25,12 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     @SneakyThrows
     @Override
     public void chatRoom(RequestMessage requestMessage, Users user) {
-
+        String json;
         if (requestMessage.getContent() == null) {
             return;
         }
-        if (sendServiceService.checkForExistenceRoom(requestMessage.getIdRoom())) {
-            String json = objectMapper.writeValueAsString(new ResponseMessage<>(
+        if (!sendServiceService.checkForExistenceRoom(requestMessage.getIdRoom())) {
+            json = objectMapper.writeValueAsString(new ResponseMessage<>(
                     Message.ROOM_DOES_NOT_EXIST,
                     MessageType.ERROR,
                     user
@@ -39,7 +39,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
             return;
         }
         if (!sendServiceService.checkUserExistenceRoom(requestMessage.getIdRoom(), user.getId())) {
-            String json = objectMapper.writeValueAsString(new ResponseMessage<>(
+            json = objectMapper.writeValueAsString(new ResponseMessage<>(
                     Message.YOU_HAVE_NO_RIGHTS_TO_THIS_ACTION,
                     MessageType.ERROR,
                     user
@@ -48,8 +48,8 @@ public class ChatMessageServiceImpl implements ChatMessageService {
             return;
         }
 
-        String json = objectMapper.writeValueAsString(new ResponseMessage<>(
-                Message.ROOM_DOES_NOT_EXIST,
+        json = objectMapper.writeValueAsString(new ResponseMessage<>(
+                requestMessage.getContent(),
                 MessageType.ERROR,
                 user,
                 sendServiceService.getRoom(requestMessage.getIdRoom())

@@ -13,4 +13,5 @@ public class Room {
     String id;
     String nameRoom;
     Set<Long> userIdSet;
+    Long owner;
 }

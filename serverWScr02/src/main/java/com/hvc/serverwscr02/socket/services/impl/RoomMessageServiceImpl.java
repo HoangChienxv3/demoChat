@@ -19,10 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -93,13 +90,23 @@ public class RoomMessageServiceImpl implements RoomMessageService {
     @Override
     public void getListUserRoom(RequestMessage requestMessage, Users user) throws JsonProcessingException {
         RoomUser roomUser = SocketManager.roomUserMap.get(user.getId());
+        String json;
+        if (roomUser == null) {
+            json = objectMapper.writeValueAsString(new ResponseMessage<>(
+                    Message.YOU_HAVE_NOT_JOINED_AND_ROOMS_YET,
+                    MessageType.ERROR,
+                    user
+            ));
+            sendServiceService.sendMessageToUser(json, user);
+            return;
+        }
         List<RoomResponse> roomList = new ArrayList<>();
         roomUser.getRoomIdSet().forEach(idRoom -> {
             if (sendServiceService.checkForExistenceRoom(idRoom)) {
                 roomList.add(new RoomResponse(sendServiceService.getRoom(idRoom)));
             }
         });
-        String json = objectMapper.writeValueAsString(new ResponseMessage<>(
+        json = objectMapper.writeValueAsString(new ResponseMessage<>(
                 roomList,
                 MessageType.GET_LIST_USER_ROOM,
                 user
@@ -113,6 +120,39 @@ public class RoomMessageServiceImpl implements RoomMessageService {
     }
 
     @Override
+    public void updateRoom(RequestMessage requestMessage, Users user) throws JsonProcessingException {
+        Room room = sendServiceService.getRoom(requestMessage.getIdRoom());
+        if (room == null) {
+            String json = objectMapper.writeValueAsString(new ResponseMessage<>(
+                    Message.ROOM_DOES_NOT_EXIST,
+                    MessageType.ERROR,
+                    user
+            ));
+            sendServiceService.sendMessageToUser(json, user);
+            return;
+        }
+        if (!sendServiceService.checkUserExistenceRoom(requestMessage.getIdRoom(), user.getId())
+                || !Objects.equals(user.getId(), room.getOwner())) {
+            String json = objectMapper.writeValueAsString(new ResponseMessage<>(
+                    Message.YOU_HAVE_NO_RIGHTS_TO_THIS_ACTION,
+                    MessageType.ERROR,
+                    user
+            ));
+            sendServiceService.sendMessageToUser(json, user);
+            return;
+        }
+        room.setNameRoom(requestMessage.getContent());
+        createOrUpdateInfo(room, user);
+        String json = objectMapper.writeValueAsString(new ResponseMessage<>(
+                room,
+                MessageType.UPDATE_ROOM,
+                user,
+                sendServiceService.getRoom(requestMessage.getIdRoom())
+        ));
+        sendServiceService.sendMessageToUserInRoom(json, sendServiceService.getRoom(requestMessage.getIdRoom()));
+    }
+
+    @Override
     public void deleteRoom(RequestMessage requestMessage, Users user) {
 
     }
@@ -123,6 +163,7 @@ public class RoomMessageServiceImpl implements RoomMessageService {
         while (sendServiceService.checkForExistenceRoom(idRoom)) {
             idRoom = RandomStringExmple.randomAlphaNumeric(12);
         }
+        room.setOwner(user.getId());
         room.setId(idRoom);
         room.setNameRoom(requestMessage.getContent() != null ? requestMessage.getContent() : null);
         return room;

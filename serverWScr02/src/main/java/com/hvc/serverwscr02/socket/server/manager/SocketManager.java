@@ -8,8 +8,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SocketManager {
+    //connection of user
     public static Map<Long, WebSocketServer> serverMap = new ConcurrentHashMap<>();
+    //Map room
     public static Map<String, Room> roomMap = new ConcurrentHashMap<>();
+    //Map room of user
     public static Map<Long, RoomUser> roomUserMap = new ConcurrentHashMap<>();
     public static int onlineCount = 0;
 

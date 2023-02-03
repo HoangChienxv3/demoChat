@@ -76,6 +76,7 @@ public class WebSocketServer {
                 roomMessageService.getListRoomOfUser(requestMessage, user);
                 break;
             case GET_LIST_USER_IN_ROOM:
+                roomMessageService.getListUserInRoom(requestMessage, user);
                 break;
             case UPDATE_ROOM:
                 roomMessageService.updateRoom(requestMessage, user);

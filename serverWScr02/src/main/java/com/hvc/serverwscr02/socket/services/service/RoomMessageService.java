@@ -19,4 +19,5 @@ public interface RoomMessageService {
     void deleteRoom(RequestMessage requestMessage, Users user);
 
 
+    void getListUserInRoom(RequestMessage requestMessage, Users user) throws JsonProcessingException;
 }

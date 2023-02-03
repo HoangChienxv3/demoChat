@@ -2,6 +2,7 @@ package com.hvc.serverwscr02.socket.services.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hvc.serverwscr02.dto.UserResponse;
 import com.hvc.serverwscr02.security.model.Users;
 import com.hvc.serverwscr02.security.service.service.UserService;
 import com.hvc.serverwscr02.socket.dto.request.RequestMessage;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -115,6 +117,38 @@ public class RoomMessageServiceImpl implements RoomMessageService {
     }
 
     @Override
+    public void getListUserInRoom(RequestMessage requestMessage, Users user) throws JsonProcessingException {
+        Room room = sendServiceService.getRoom(requestMessage.getIdRoom());
+        String json;
+        if (room == null) {
+            json = objectMapper.writeValueAsString(new ResponseMessage<>(
+                    Message.ROOM_DOES_NOT_EXIST,
+                    MessageType.ERROR,
+                    user
+            ));
+            sendServiceService.sendMessageToUser(json, user);
+            return;
+        }
+        if (!sendServiceService.checkUserExistenceRoom(requestMessage.getIdRoom(), user.getId())) {
+            json = objectMapper.writeValueAsString(new ResponseMessage<>(
+                    Message.YOU_HAVE_NO_RIGHTS_TO_THIS_ACTION,
+                    MessageType.ERROR,
+                    user
+            ));
+            sendServiceService.sendMessageToUser(json, user);
+            return;
+        }
+        List<Users> usersList = userService.findAllByIdIn(room.getUserIdSet());
+        json = objectMapper.writeValueAsString(new ResponseMessage<>(
+                usersList.stream().map(UserResponse::new).collect(Collectors.toList()),
+                MessageType.GET_LIST_USER_IN_ROOM,
+                user,
+                room
+        ));
+        sendServiceService.sendMessageToUser(json, user);
+    }
+
+    @Override
     public void leaveRoom(RequestMessage requestMessage, Users user) throws JsonProcessingException {
         Room room = sendServiceService.getRoom(requestMessage.getIdRoom());
         if (room == null) {
@@ -182,6 +216,7 @@ public class RoomMessageServiceImpl implements RoomMessageService {
     public void deleteRoom(RequestMessage requestMessage, Users user) {
 
     }
+
 
     Room createNewRoom(RequestMessage requestMessage, Users user) {
         Room room = new Room();

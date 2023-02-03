@@ -50,7 +50,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 
         json = objectMapper.writeValueAsString(new ResponseMessage<>(
                 requestMessage.getContent(),
-                MessageType.ERROR,
+                MessageType.CHAT,
                 user,
                 sendServiceService.getRoom(requestMessage.getIdRoom())
         ));

@@ -12,7 +12,7 @@ public interface RoomMessageService {
 
     void getListUserRoom(RequestMessage requestMessage, Users user) throws JsonProcessingException;
 
-    void leaveRoom(RequestMessage requestMessage, Users user);
+    void leaveRoom(RequestMessage requestMessage, Users user) throws JsonProcessingException;
 
     void updateRoom(RequestMessage requestMessage, Users user) throws JsonProcessingException;
 

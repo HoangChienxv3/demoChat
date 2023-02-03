@@ -79,7 +79,7 @@ public class WebSocketServer {
                 roomMessageService.updateRoom(requestMessage, user);
                 break;
             case LEAVE_ROOM:
-                System.out.println(message + MessageType.LEAVE_ROOM);
+                roomMessageService.leaveRoom(requestMessage, user);
                 break;
             case DELETE_USER_ROOM:
                 System.out.println(message + MessageType.DELETE_USER_ROOM);

@@ -115,8 +115,34 @@ public class RoomMessageServiceImpl implements RoomMessageService {
     }
 
     @Override
-    public void leaveRoom(RequestMessage requestMessage, Users user) {
-
+    public void leaveRoom(RequestMessage requestMessage, Users user) throws JsonProcessingException {
+        Room room = sendServiceService.getRoom(requestMessage.getIdRoom());
+        if (room == null) {
+            String json = objectMapper.writeValueAsString(new ResponseMessage<>(
+                    Message.ROOM_DOES_NOT_EXIST,
+                    MessageType.ERROR,
+                    user
+            ));
+            sendServiceService.sendMessageToUser(json, user);
+            return;
+        }
+        if (!sendServiceService.checkUserExistenceRoom(requestMessage.getIdRoom(), user.getId())) {
+            String json = objectMapper.writeValueAsString(new ResponseMessage<>(
+                    Message.YOU_HAVE_NO_RIGHTS_TO_THIS_ACTION,
+                    MessageType.ERROR,
+                    user
+            ));
+            sendServiceService.sendMessageToUser(json, user);
+            return;
+        }
+        deleteUserRoom(room, user);
+        String json = objectMapper.writeValueAsString(new ResponseMessage<>(
+                user.getUsername() + " " + Message.LEFT_THE_ROOM,
+                MessageType.UPDATE_ROOM,
+                user,
+                sendServiceService.getRoom(requestMessage.getIdRoom())
+        ));
+        sendServiceService.sendMessageToUserInRoom(json, sendServiceService.getRoom(requestMessage.getIdRoom()));
     }
 
     @Override
@@ -195,6 +221,22 @@ public class RoomMessageServiceImpl implements RoomMessageService {
         }
         roomIdSet.add(room.getId());
         roomUser.setRoomIdSet(roomIdSet);
+        SocketManager.roomUserMap.put(user.getId(), roomUser);
+    }
+
+    void deleteUserRoom(Room room, Users user) {
+        deleteUserInRoomList(room, user);
+        deleteUserInUserRoomList(room, user);
+    }
+
+    void deleteUserInRoomList(Room room, Users user) {
+        room.getUserIdSet().remove(user.getId());
+        SocketManager.roomMap.put(room.getId(), room);
+    }
+
+    void deleteUserInUserRoomList(Room room, Users user) {
+        RoomUser roomUser = SocketManager.roomUserMap.get(user.getId());
+        roomUser.getRoomIdSet().remove(room.getId());
         SocketManager.roomUserMap.put(user.getId(), roomUser);
     }
 

@@ -11,4 +11,6 @@ public class Message {
     public static final String YOU_HAVE_NO_RIGHTS_TO_THIS_ACTION = "You have no rights to this action";
     public static final String PARTNER_DOSE_NOT_EXIST = "Partner does not exist";
 
+    public static final String LEFT_THE_ROOM = "Left the room";
+
 }
